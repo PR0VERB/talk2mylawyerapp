@@ -1,19 +1,46 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, DollarSign, Users, TrendingUp, MessageSquare, FileText } from 'lucide-react';
 import Header from '../../components/layout/Header';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+
 
 export default function LawyerDashboard() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate('/login', { replace: true });
+      return;
+    }
+    const load = async () => {
+      const { data } = await supabase
+        .from('lawyer_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!data) {
+        navigate('/lawyer/onboarding', { replace: true });
+      } else {
+        setProfile(data);
+      }
+    };
+    load();
+  }, [user, loading, navigate]);
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Good morning, Sarah</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Good morning, {profile?.full_name || user?.email}</h1>
           <p className="text-gray-600">Here's what's happening with your practice today</p>
         </div>
 

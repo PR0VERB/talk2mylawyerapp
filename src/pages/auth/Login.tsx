@@ -5,23 +5,25 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card, CardContent } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+
 
 export default function Login() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
+
     if (!formData.email || !formData.password) {
       setErrors({ general: 'Please fill in all fields' });
       return;
@@ -30,8 +32,21 @@ export default function Login() {
     setLoading(true);
     try {
       await signIn(formData.email, formData.password);
-      // Navigate based on user role (you'd determine this from user profile)
-      navigate('/client/dashboard');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: existing } = await supabase
+          .from('lawyer_profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (existing) {
+          navigate('/lawyer/dashboard');
+        } else {
+          navigate('/lawyer/onboarding');
+        }
+      } else {
+        navigate('/login');
+      }
     } catch (error) {
       setErrors({ general: 'Invalid email or password' });
     } finally {

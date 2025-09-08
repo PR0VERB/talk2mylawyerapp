@@ -5,12 +5,14 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card, CardContent } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+
 
 export default function SignUp() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,14 +21,14 @@ export default function SignUp() {
     firstName: '',
     lastName: '',
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
+
     // Validation
     const newErrors: Record<string, string> = {};
     if (!formData.email) newErrors.email = 'Email is required';
@@ -36,7 +38,7 @@ export default function SignUp() {
     }
     if (!formData.firstName) newErrors.firstName = 'First name is required';
     if (!formData.lastName) newErrors.lastName = 'Last name is required';
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -45,7 +47,13 @@ export default function SignUp() {
     setLoading(true);
     try {
       await signUp(formData.email, formData.password, formData.role);
-      navigate(formData.role === 'lawyer' ? '/lawyer/dashboard' : '/client/dashboard');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate(formData.role === 'lawyer' ? '/lawyer/dashboard' : '/client/dashboard');
+      } else {
+        // If email confirmation is enabled, direct user to login
+        navigate('/login');
+      }
     } catch (error) {
       setErrors({ general: 'Failed to create account. Please try again.' });
     } finally {

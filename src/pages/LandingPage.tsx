@@ -1,10 +1,9 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, Clock, Users, Star, CheckCircle, Scale, Gavel, FileText } from 'lucide-react';
+import { ArrowRight, Shield, Clock, Users, Star, Gavel, FileText } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import { Button } from '../components/ui/Button';
-import { Card, CardContent } from '../components/ui/Card';
+import { Card } from '../components/ui/Card';
 
 export default function LandingPage() {
   return (

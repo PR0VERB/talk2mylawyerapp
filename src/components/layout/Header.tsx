@@ -5,7 +5,7 @@ import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Header() {
-  const { user, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   return (
@@ -37,7 +37,7 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
+                <Link to={userRole === 'lawyer' ? '/lawyer/dashboard' : '/client/dashboard'} className="text-gray-600 hover:text-gray-900">
                   Dashboard
                 </Link>
                 <Button variant="ghost" onClick={signOut}>
@@ -80,7 +80,7 @@ export default function Header() {
               </Link>
               {user ? (
                 <>
-                  <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
+                  <Link to={userRole === 'lawyer' ? '/lawyer/dashboard' : '/client/dashboard'} className="text-gray-600 hover:text-gray-900">
                     Dashboard
                   </Link>
                   <Button variant="ghost" onClick={signOut} className="justify-start">

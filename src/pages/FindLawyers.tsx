@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Filter, MapPin, Star, Clock, DollarSign, Sparkles, X } from 'lucide-react';
 import Header from '../components/layout/Header';
 import { Button } from '../components/ui/Button';
@@ -83,7 +83,7 @@ export default function FindLawyers() {
     }
   };
 
-  const displayedLawyers = isAISearchEnabled && results.length > 0 ? results : staticLawyers;
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -197,83 +197,154 @@ export default function FindLawyers() {
 
         {/* Results */}
         <div className="space-y-6">
-          {displayedLawyers.map((lawyer) => (
-            <Card key={lawyer.id} hover>
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                  {/* Profile Image */}
-                  <div className="flex-shrink-0">
-                    <img
-                      src={lawyer.profile_photo_url || lawyer.image || `https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400`}
-                      alt={lawyer.name}
-                      className="w-20 h-20 rounded-full object-cover"
-                    />
-                  </div>
+          {isAISearchEnabled && results.length > 0 ? (
+            results.map((lawyer) => (
+              <Card key={lawyer.id} hover>
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
+                    {/* Profile Image */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src={lawyer.profile_photo_url || `https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400`}
+                        alt={lawyer.full_name}
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    </div>
 
-                  {/* Main Info */}
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="text-xl font-semibold text-gray-900">{lawyer.full_name || lawyer.name}</h3>
-                        {(lawyer.verified !== false) && (
-                          <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✓</span>
+                    {/* Main Info */}
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="text-xl font-semibold text-gray-900">{lawyer.full_name}</h3>
+                        </div>
+                        <p className="text-gray-600">{(lawyer.practice_areas && lawyer.practice_areas[0] + ' Attorney') || 'Attorney'}</p>
+                        <div className="flex items-center space-x-1 text-gray-500 text-sm">
+                          <MapPin className="h-4 w-4" />
+                          <span>{lawyer.location}</span>
+                        </div>
+                        {isAISearchEnabled && lawyer.similarity && (
+                          <div className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full inline-block mt-1">
+                            {Math.round(lawyer.similarity * 100)}% match
                           </div>
                         )}
                       </div>
-                      <p className="text-gray-600">{lawyer.title || (lawyer.practice_areas && lawyer.practice_areas[0] + ' Attorney')}</p>
-                      <div className="flex items-center space-x-1 text-gray-500 text-sm">
-                        <MapPin className="h-4 w-4" />
-                        <span>{lawyer.location}</span>
+
+                      <div className="flex flex-wrap gap-2">
+                        {(lawyer.practice_areas || []).slice(0, 3).map((specialty) => (
+                          <span
+                            key={specialty}
+                            className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                          >
+                            {specialty}
+                          </span>
+                        ))}
                       </div>
-                      {isAISearchEnabled && lawyer.similarity && (
-                        <div className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full inline-block mt-1">
-                          {Math.round(lawyer.similarity * 100)}% match
+
+                      <div className="flex items-center space-x-6 text-sm">
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                          <span className="font-medium">{lawyer.rating}</span>
+                          <span className="text-gray-500">({lawyer.review_count} reviews)</span>
                         </div>
-                      )}
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">Responds {lawyer.response_time}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <DollarSign className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">R{lawyer.hourly_rate}/hour</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {(lawyer.practice_areas || lawyer.specialties || []).slice(0, 3).map((specialty) => (
-                        <span
-                          key={specialty}
-                          className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                        >
-                          {specialty}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center space-x-6 text-sm">
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        <span className="font-medium">{lawyer.rating}</span>
-                        <span className="text-gray-500">({lawyer.reviews} reviews)</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-600">Responds {lawyer.response_time || lawyer.responseTime}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-600">R{lawyer.hourly_rate || lawyer.hourlyRate}/hour</span>
-                      </div>
+                    {/* Actions */}
+                    <div className="flex flex-col space-y-2 md:flex-shrink-0">
+                      <Button className="w-full md:w-auto">
+                        View Profile
+                      </Button>
+                      <Button variant="outline" className="w-full md:w-auto">
+                        Send Message
+                      </Button>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            staticLawyers.map((lawyer) => (
+              <Card key={lawyer.id} hover>
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
+                    {/* Profile Image */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src={lawyer.image || `https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400`}
+                        alt={lawyer.name}
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col space-y-2 md:flex-shrink-0">
-                    <Button className="w-full md:w-auto">
-                      View Profile
-                    </Button>
-                    <Button variant="outline" className="w-full md:w-auto">
-                      Send Message
-                    </Button>
+                    {/* Main Info */}
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="text-xl font-semibold text-gray-900">{lawyer.name}</h3>
+                          {(lawyer.verified !== false) && (
+                            <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs">✓</span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-gray-600">{lawyer.title}</p>
+                        <div className="flex items-center space-x-1 text-gray-500 text-sm">
+                          <MapPin className="h-4 w-4" />
+                          <span>{lawyer.location}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {(lawyer.specialties || []).slice(0, 3).map((specialty) => (
+                          <span
+                            key={specialty}
+                            className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                          >
+                            {specialty}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center space-x-6 text-sm">
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                          <span className="font-medium">{lawyer.rating}</span>
+                          <span className="text-gray-500">({lawyer.reviews} reviews)</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">Responds {lawyer.responseTime}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <DollarSign className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">R{lawyer.hourlyRate}/hour</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col space-y-2 md:flex-shrink-0">
+                      <Button className="w-full md:w-auto">
+                        View Profile
+                      </Button>
+                      <Button variant="outline" className="w-full md:w-auto">
+                        Send Message
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
+
         </div>
 
         {/* Load More */}
